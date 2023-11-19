@@ -18,7 +18,6 @@ default_elements = [
         attributes=[
             Attribute(name="min", type=DataType.number, value=0),
             Attribute(name="max", type=DataType.number, value=100),
-            Attribute(name="label", type=DataType.text, value="Slider Label")
         ],
         style={"color": "blue"},
         actions={},

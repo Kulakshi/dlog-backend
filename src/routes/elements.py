@@ -9,7 +9,7 @@ from pydantic import ValidationError
 router = APIRouter()
 @router.post("/create/")
 async def create_instance(
-        element: elements.ElementInstance = Body(...),
+        element: elements.Element = Body(...),
         db: MongoDB = Depends(get_mongo_db)):
     instance_data = element.dict()
     db.elements.insert_one(instance_data)

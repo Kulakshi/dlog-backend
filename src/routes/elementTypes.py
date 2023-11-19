@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Body, Depends
 from fastapi import HTTPException
 from datetime import datetime
 from mongodb import get_mongo_db, MongoDB
-from src.models.elements import Attribute, ElementType, ElementInstance
+from src.models.elements import Attribute, ElementType, Element
 from src.data.elements import default_elements
 from src.models.commons import ApiResponse
 from bson.json_util import dumps
@@ -38,8 +38,8 @@ async def get_instance(type_name: str, db: MongoDB = Depends(get_mongo_db)):
         attributes = [
             Attribute(**attr) for attr in type_data.get('attributes', [])
         ]
-        element_instance = ElementInstance(
-            element_type_id=str(type_data['_id']),
+        element_instance = Element(
+            element_type=str(type_data['name']),
             attributes=attributes
         )
         return ApiResponse(code=200, response={"type": element_instance})

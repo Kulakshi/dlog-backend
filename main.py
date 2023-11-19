@@ -3,7 +3,7 @@ import pymongo
 
 import mongodb
 # from config import MONGO_URI, DATABASE_NAME, COLLECTION_NAME
-from src.routes import elements, admin, user, elementTypes
+from src.routes import elements, admin, user, elementTypes, form
 from fastapi.middleware.cors import CORSMiddleware
 from mongodb import MongoDB
 
@@ -27,6 +27,7 @@ app.include_router(prefix="/element-types", router=elementTypes.router)
 app.include_router(prefix="/elements", router=elements.router)
 app.include_router(prefix="/admin", router=admin.router)
 app.include_router(prefix="/user", router=user.router)
+app.include_router(prefix="/form", router=form.router)
 
 
 
