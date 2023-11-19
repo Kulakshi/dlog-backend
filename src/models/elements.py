@@ -1,19 +1,39 @@
 from pydantic import BaseModel, Field
 from enum import Enum as PydanticEnum
-from typing import Dict, Any
+from typing import Dict, List, Any, Optional, TypeVar, Generic
 
-class ElementType(PydanticEnum):
-    button = "button"
-    slider = "slider"
 
-class AdditionalAttributes(BaseModel):
-    custom_attributes: dict = Field(default_factory=dict)
+class DataType(PydanticEnum):
+    text = "text"
+    number = "number"
 
-class Element(BaseModel):
-    id: int
-    label: str
-    customLabel: str
-    hideLabel: bool
-    style: Dict[str, Any]
-    typeOfElement: ElementType
-    additionalAttributes: AdditionalAttributes
+
+T = TypeVar('T')
+
+
+class Attribute(BaseModel, Generic[T]):
+    name: str
+    type: str
+    value: T
+
+
+class ElementType(BaseModel):
+    name: str
+    attributes: List[Attribute] = []
+    style: Optional[Dict[str, Any]]
+    actions: dict = Optional[Dict[str, Any]]
+
+
+class ElementInstance(BaseModel):
+    element_type_id: str = None
+    attributes: List[Attribute] = []
+    label: Optional[str] = None
+    customLabel: Optional[str] = None
+    hideLabel: bool = True
+    style: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Form(BaseModel):
+    user_id: str = None
+    name: str = None
+    elements: Optional[List[ElementInstance]] = None
