@@ -1,8 +1,14 @@
 {
-  "functions": {
-    "api/**/*.py": {
-      "runtime": "python3.8",
-      "handler": "main.app"
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
+  ]
 }
