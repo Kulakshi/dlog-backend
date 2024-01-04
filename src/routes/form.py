@@ -55,6 +55,7 @@ async def personalize_element(
 
 
 
+
 @router.post("/add-entry/")
 async def add_data_entry(
         entry: DataEntry = Body(...),
