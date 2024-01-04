@@ -30,7 +30,7 @@ class Element(BaseModel):
     element_type: str = None
     attributes: List[Attribute] = []
     label: Optional[str] = None
-    customLabel: Optional[str] = None
+    hide_label: bool = False
     style: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -40,12 +40,10 @@ class Form(BaseModel):
     elements: Optional[List[Element]] = None
 
 
-class PersonalElement(BaseModel):
+class PersonalForm(BaseModel):
     user_id: str = None
     form_id: str = None
-    element_id: str = None
-    customLabel: Optional[str] = None
-    hideLabel: bool = True
+    hide_label: bool = False
 
 
 class DataEntry(BaseModel):

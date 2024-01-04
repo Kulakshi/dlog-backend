@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body, Depends
 from mongodb import get_mongo_db, MongoDB
 from src.models.commons import ApiResponse
-from src.models.elements import Element, DataEntry, PersonalElement
+from src.models.elements import Element, DataEntry, PersonalForm
 from bson import ObjectId
 from fastapi import HTTPException, status
 
@@ -30,34 +30,27 @@ async def get_all_forms(
     if '_id' in form and isinstance(form['_id'], ObjectId):
         form['_id'] = str(form['_id'])
 
-    personalElements = db.personalElements.find({"user_id": user_id, "form_id": form_id})
-    elementIdToElem = {elem['element_id'] : elem for elem in list(personalElements)}
-    for element in form['elements']:
-        if element['element_id'] in elementIdToElem.keys():
-            element['customLabel'] = (elementIdToElem[element['element_id']])['customLabel']
+    personalForm = db.PersonalForm.find_one({"user_id": user_id, "form_id": form_id})
+    if personalForm:
+            form['hide_label'] = personalForm["hide_label"]
+    else:
+        form['hide_label'] = False
 
     return ApiResponse(code=200, response={"form": form})
 
 
 @router.post("/personalize/")
 async def personalize_element(
-        entry: PersonalElement = Body(...),
+        entry: PersonalForm = Body(...),
         db: MongoDB = Depends(get_mongo_db)
 ):
-    element = db.personalElements.find_one({"user_id": entry.user_id, "element_id":entry.element_id})
-    result = None
-    if element:
-        result = db.personalElements.update_one({"user_id": entry.user_id, "element_id":entry.element_id}, {"$set": entry.dict()})
-        if result.modified_count > 0 : return ApiResponse(code=200, response={"message": "Instance updated successfully"})
+    form = db.PersonalForm.find_one({"user_id": entry.user_id, "form_id": entry.form_id})
+    if form:
+        result = await db.PersonalForm.update_one({"user_id": entry.user_id, "form_id":entry.form_id}, {"$set": entry.dict()})
+        if result : return ApiResponse(code=200, response={"message": "Instance updated successfully"})
     else:
-        result = db.personalElements.insert_one(entry.dict())
+        result = await db.PersonalForm.insert_one(entry.dict())
         if result.inserted_id: return ApiResponse(code=200, response={"message": "Instance added successfully"})
-
-    if not result:
-        raise HTTPException(status_code=500, detail="Failed to insert entry into the database")
-
-
-
 
 
 
