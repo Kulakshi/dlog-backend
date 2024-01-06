@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Query, Body, Depends
+from fastapi import APIRouter, Request, Body, Depends
 from mongodb import get_mongo_db, MongoDB
 from src.models.commons import ApiResponse
 from src.models.elements import Element, DataEntry, PersonalForm
 from bson import ObjectId
 from fastapi import HTTPException, status
+import asyncio
 
 router = APIRouter()
 
@@ -85,3 +86,36 @@ async def add_data_entry(
         raise HTTPException(status_code=500, detail="Failed to insert entry into the database")
 
     return ApiResponse(code=200, response={"message": "Instance created successfully"})
+
+
+@router.get("/get-entries/{user_id}/{form_id}")
+async def get_entries(
+        form_id: str,
+        user_id: str,
+        db: MongoDB = Depends(get_mongo_db)
+):
+    form = db.forms.find_one({"_id": ObjectId(form_id)})
+    if form and form['user_id'] == user_id:
+        data = list(db.entries.find({"form_id": form_id},{"_id": 0,"form_id": 0}))
+        idToElement = dict((elem["element_id"], elem) for elem in form['elements'])
+        outputData = []
+        users = set()
+        index = 0
+        for document in data:
+            if document['element_id']:
+                if document['element_id'] in idToElement.keys():
+                    output = {}
+                    output["index"] = index
+                    output["element_id"] = document['element_id']
+                    output['element_type'] = idToElement[document['element_id']]['element_type']
+                    output['label'] = idToElement[document['element_id']]['label']
+                    output['user'] = document['user_id']
+                    output['time'] = document['time']
+                    output['value'] = document['value']
+                    outputData.append(output)
+                    users.add(document['user_id'])
+                    index += 1
+
+        return ApiResponse(code=200, response={"data": {"all":outputData, "count":len(outputData), "user_count":len(users)}})
+    else:
+        return ApiResponse(code=200, response={"data": []})

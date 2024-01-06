@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Query, Body, Depends
-from datetime import datetime
-from pydantic import BaseModel
 from mongodb import get_mongo_db, MongoDB
-from src.models.commons import ApiResponse
+from src.models.commons import ApiResponse, UserEntry
 
 
 router = APIRouter()
 
-class UserEntry(BaseModel):
-    user_id: str
-    time: datetime
-    team: str
-    project: str
 
 
 @router.post("/login/")
