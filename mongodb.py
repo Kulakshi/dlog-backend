@@ -11,7 +11,7 @@ class MongoDB:
         return self.client[DATABASE_NAME]
 
     def close(self):
-        # self.client.drop_database(DATABASE_NAME)
+        self.client.drop_database(DATABASE_NAME)
         self.client.close()
 
 
