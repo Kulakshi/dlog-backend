@@ -8,6 +8,7 @@ class MongoDB:
         self.client = MongoClient(MONGO_URI)
 
     def get_database(self):
+        self.client.drop_database(DATABASE_NAME)
         return self.client[DATABASE_NAME]
 
     def close(self):
