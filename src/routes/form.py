@@ -34,6 +34,11 @@ async def get_all_forms(
     personalForm = db.PersonalForm.find_one({"user_id": user_id, "form_id": form_id})
     if personalForm:
             form['hide_label'] = personalForm["hide_label"]
+            form['layout'] = personalForm["layout"]
+            if personalForm["layout"]:
+                layoutDict = {layout["i"] : layout for layout in personalForm["layout"]}
+                for elem in form["elements"]:
+                    elem["layout"] = layoutDict[elem["element_id"]]
     else:
         form['hide_label'] = False
 
@@ -47,7 +52,7 @@ async def personalize_element(
 ):
     form = db.PersonalForm.find_one({"user_id": entry.user_id, "form_id": entry.form_id})
     if form:
-        result = await db.PersonalForm.update_one({"user_id": entry.user_id, "form_id":entry.form_id}, {"$set": entry.dict()})
+        result = db.PersonalForm.update_one({"user_id": entry.user_id, "form_id":entry.form_id}, {"$set": entry.dict()})
         if result : return ApiResponse(code=200, response={"message": "Instance updated successfully"})
     else:
         result = await db.PersonalForm.insert_one(entry.dict())
@@ -100,7 +105,7 @@ async def get_entries(
         idToElement = dict((elem["element_id"], elem) for elem in form['elements'])
         outputData = []
         users = set()
-        index = 0
+        index = 1
         for document in data:
             if document['element_id']:
                 if document['element_id'] in idToElement.keys():

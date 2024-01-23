@@ -7,6 +7,7 @@ from datetime import datetime
 class DataType(PydanticEnum):
     text = "text"
     number = "number"
+    boolean = "boolean"
 
 
 T = TypeVar('T')
@@ -39,12 +40,18 @@ class Form(BaseModel):
     name: str = None
     elements: Optional[List[Element]] = None
 
+class Layout(BaseModel):
+    h: int = 1
+    w: int = 1
+    x: int = 0
+    y: int = 0
+    i: str = None #element id
 
 class PersonalForm(BaseModel):
     user_id: str = None
     form_id: str = None
-    hide_label: bool = False
-
+    hide_label: Optional[bool] = None
+    layout: Optional[List[Layout]] = None
 
 class DataEntry(BaseModel):
     user_id: str = None

@@ -22,4 +22,10 @@ default_elements = [
         style={"color": "blue"},
         actions={},
     ),
+    ElementType(
+        name="Toggle",
+        attributes=[Attribute(name="checked", type=DataType.boolean, value=True) ],
+        style={"color": "blue"},
+        actions={},
+    ),
 ]
