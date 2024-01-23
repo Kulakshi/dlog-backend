@@ -17,6 +17,7 @@ def insert_default_elements():
         existing_element = db.elementTypes.find_one({"name": default_element.name})
         if not existing_element:
             db.elementTypes.insert_one(default_element.dict())
+        print("Added default elements")
 
 
 # Event to execute on startup
