@@ -20,8 +20,9 @@ async def get_all_forms(
     return ApiResponse(code=200, response={"forms": forms})
 
 
-@router.get("/{user_id}/{form_id}/")
+@router.get("/{user_role}/{user_id}/{form_id}/")
 async def get_all_forms(
+        user_role: str,
         form_id: str,
         user_id: str,
         db: MongoDB = Depends(get_mongo_db)
@@ -31,16 +32,16 @@ async def get_all_forms(
     if '_id' in form and isinstance(form['_id'], ObjectId):
         form['_id'] = str(form['_id'])
 
-    personalForm = db.PersonalForm.find_one({"user_id": user_id, "form_id": form_id})
-    if personalForm:
-            form['hide_label'] = personalForm["hide_label"]
-            form['layout'] = personalForm["layout"]
-            if personalForm["layout"]:
-                layoutDict = {layout["i"] : layout for layout in personalForm["layout"]}
-                for elem in form["elements"]:
-                    elem["layout"] = layoutDict[elem["element_id"]]
-    else:
-        form['hide_label'] = False
+    if (user_role != "ADMIN"):
+        personalForm = db.PersonalForm.find_one({"user_id": user_id, "form_id": form_id})
+        if personalForm:
+                form['hide_label'] = personalForm["hide_label"]
+                if personalForm["layout"]:
+                    layoutDict = {layout["i"] : layout for layout in personalForm["layout"]}
+                    for elem in form["elements"]:
+                        elem["layout"] = layoutDict[elem["element_id"]]
+        else:
+            form['hide_label'] = False
 
     return ApiResponse(code=200, response={"form": form})
 

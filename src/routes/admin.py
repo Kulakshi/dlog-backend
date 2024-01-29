@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body, Depends
 from fastapi import HTTPException, status
 from mongodb import get_mongo_db, MongoDB
-from src.models.elements import Element, Form
+from src.models.elements import Element, Form, PersonalForm
 from src.models.commons import ApiResponse
 from bson import ObjectId
 
@@ -46,6 +46,23 @@ async def create_form(
     return ApiResponse(code=200, response={"message": "Form created successfully",
                                            "form": form})
 
+
+@router.post("/set-layout/")
+async def setLayout(
+        entry: PersonalForm = Body(...),
+        db: MongoDB = Depends(get_mongo_db)
+):
+    form = db.forms.find_one({"_id": ObjectId(entry.form_id)})
+
+    if form["user_id"] == entry.user_id:
+        layoutDict = {layout.i: layout.dict() for layout in entry.layout}
+        for elem in form["elements"]:
+            elem["layout"] = layoutDict[elem["element_id"]]
+        db.forms.update_one({"_id": ObjectId(entry.form_id)}, {"$set": form})
+
+        return ApiResponse(code=200, response={"message": "Form layout updated successfully"})
+    else:
+        return ApiResponse(code=401, response={"message": "Not authorized: not the owner of the form"})
 
 @router.get("/get-form-structures/")
 async def get_form_structures():
