@@ -11,6 +11,6 @@ class ApiResponse(BaseModel):
 
 class UserEntry(BaseModel):
     user_id: str
-    time: datetime
-    team: str
-    project: str
+    time: Optional[datetime] = None
+    team: Optional[str] = None
+    project: Optional[str] = None

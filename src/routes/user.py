@@ -1,10 +1,36 @@
 from fastapi import APIRouter, Query, Body, Depends
 from mongodb import get_mongo_db, MongoDB
 from src.models.commons import ApiResponse, UserEntry
+from src.data.users import default_users
+from bson import ObjectId
 
 
 router = APIRouter()
 
+
+def insert_default_users():
+    db = MongoDB().get_database()
+    for user in default_users:
+        existing_element = db.user.find_one({"user_id": user.user_id})
+        if not existing_element:
+            db.user.insert_one(user.dict())
+        print("Added default users")
+
+
+@router.on_event("startup")
+def on_startup():
+    insert_default_users()
+
+
+@router.get("/all/")
+async def get_all_users(
+        db: MongoDB = Depends(get_mongo_db)
+):
+    users = list(db.user.find())
+    for user in users:
+        if '_id' in user and isinstance(user['_id'], ObjectId):
+            user['_id'] = str(user['_id'])
+    return ApiResponse(code=200, response={"users": users})
 
 
 @router.post("/login/")
